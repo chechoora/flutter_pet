@@ -1,4 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:pet/inherited/inherited_content_widget.dart';
+import 'package:pet/inherited/inherited_data_widget.dart';
+import 'package:pet/provider/provider_content_widget.dart';
+import 'package:pet/provider/provider_model.dart';
+import 'package:pet/scoped_model/scoped_model_content_widget.dart';
+import 'package:pet/scoped_model/scoped_model_data.dart';
+import 'package:provider/provider.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 void main() {
   runApp(MyApp());
@@ -24,10 +32,38 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _ScopedModelPageState createState() => _ScopedModelPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _InheritedPageState extends State<MyHomePage> {
+  int _counter = 0;
+
+  void _incrementCounter() {
+    setState(() {
+      _counter++;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InheritedDataWidget(
+      counter: _counter,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: InheritedContentWidget(),
+        floatingActionButton: FloatingActionButton(
+          onPressed: _incrementCounter,
+          tooltip: 'Increment',
+          child: Icon(Icons.add),
+        ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
+    );
+  }
+}
+
+class _ProviderPageState extends State<MyHomePage> {
   int _counter = 0;
 
   void _incrementCounter() {
@@ -42,25 +78,40 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
+      body: ProxyProvider0<ProviderModel>(
+        update: (_, __) => ProviderModel(_counter),
+        child: ProviderContentWidget(),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class _ScopedModelPageState extends State<MyHomePage> {
+  @override
+  Widget build(BuildContext context) {
+    return ScopedModel(
+      model: ScopedModelData(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: ScopedModelContentWidget(),
+        floatingActionButton: ScopedModelDescendant<ScopedModelData>(
+            builder: (context, child, model) {
+          return FloatingActionButton(
+            onPressed: () {
+              model.increment();
+            },
+            tooltip: 'Increment',
+            child: Icon(Icons.add),
+          );
+        }), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 }
